@@ -13,6 +13,8 @@ from langchain.prompts.prompt import PromptTemplate
 from langchain.agents import load_tools, initialize_agent, AgentType
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
+import datetime
+from datetime import timedelta
 
 logging.basicConfig(filename='/home/app/logs/print.log', level=logging.INFO, format='%(asctime)s - %(message)s')
 
@@ -40,7 +42,7 @@ async def incoming_sms_hook(request: Request):
 
     return "Ok"
 
-async def book_appointment(message: Message) -> list[str]:
+async def book_appointment() -> list[str]:
     # Use the service account key file for authentication
     credentials = service_account.Credentials.from_service_account_file(
         'path/to/your/service_account_key.json',
@@ -52,7 +54,28 @@ async def book_appointment(message: Message) -> list[str]:
 
     # Ask the user for the date and time of the appointment
     response = "Sure, what date and time would you like to schedule your appointment for?"
-    return [response]
+
+    # Assuming you get the user's response in the next message
+    # You need to implement logic to parse the date and time from the user's response
+
+    # For demonstration purposes, let's assume user_response contains the date and time
+    user_response = "January 7, 2024 at 10:00 AM"
+
+    # Parse the date and time (you may need a more sophisticated parsing logic)
+    # For simplicity, let's assume a successful parsing result
+    appointment_datetime = datetime.datetime.strptime(user_response, "%B %d, %Y at %I:%M %p")
+
+    # Create an event in the calendar
+    event = {
+        'summary': 'Appointment',
+        'start': {'dateTime': appointment_datetime.isoformat(), 'timeZone': 'UTC'},
+        'end': {'dateTime': (appointment_datetime + timedelta(hours=1)).isoformat(), 'timeZone': 'UTC'},
+    }
+
+    calendar_id = 'primary'  # You can use a specific calendar ID if needed
+    event = service.events().insert(calendarId=calendar_id, body=event).execute()
+
+    return [response, f"Your appointment has been booked. Event ID: {event['id']}"]
 
 async def alert_client(msg: str) -> str:
     return f"Sending sms to client: {msg} "
@@ -153,7 +176,7 @@ async def execute_message(message: Message) -> list[str]:
 
                 # Check for the intent of booking an appointment
                 if "appointment" in key.lower() or "schedule" in key.lower():
-                    actions.extend(await book_appointment(message))
+                    actions.extend(await book_appointment())
 
         return actions
     except json.JSONDecodeError as e:
