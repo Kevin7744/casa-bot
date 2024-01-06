@@ -1,3 +1,5 @@
+# main.py
+
 import fastapi
 import json
 import re
@@ -40,19 +42,6 @@ async def incoming_sms_hook(request: Request):
 
     return "Ok"
 
-@app.post("/only-for-testing-agent")
-async def only_for_testing_agent(wrap: TestWrap) -> list[str]:
-    if wrap.password == "BadMotherfucker":
-        return await execute_message(wrap.message)
-    else:
-        raise HTTPException(status_code=fastapi.status.HTTP_403_FORBIDDEN, detail="Access forbidden")
-
-async def alert_client(msg: str) -> str:
-    return f"Sending sms to client: {msg} "
-
-async def alert_realtor(msg: str) -> str:
-    return f"Sending sms to realtor: {msg}"
-
 async def book_appointment(message: Message) -> list[str]:
     # Use the service account key file for authentication
     credentials = service_account.Credentials.from_service_account_file(
@@ -63,29 +52,15 @@ async def book_appointment(message: Message) -> list[str]:
     # Build the Google Calendar API service
     service = build('calendar', 'v3', credentials=credentials)
 
-    # Implement the logic to create an event in the calendar
-    event = {
-        'summary': 'Appointment for ' + message.phone_number,
-        'start': {
-            'dateTime': '2024-01-07T10:00:00',
-            'timeZone': 'YourTimeZone',  # Replace with the actual timezone
-        },
-        'end': {
-            'dateTime': '2024-01-07T11:00:00',
-            'timeZone': 'YourTimeZone',  # Replace with the actual timezone
-        },
-    }
-
-    # Call the Calendar API to create the event
-    created_event = service.events().insert(calendarId='primary', body=event).execute()
-
-    # Return the response to the user in a formatted format
-    response = f"Appointment booked successfully for {message.phone_number} on {created_event['start']['dateTime']}."
+    # Ask the user for the date and time of the appointment
+    response = "Sure, what date and time would you like to schedule your appointment for?"
     return [response]
 
-### HELPERS
-def strip_double_quote_if_exists(message):
-    return message[0:] if message.startswith('"') else message
+async def alert_client(msg: str) -> str:
+    return f"Sending sms to client: {msg} "
+
+async def alert_realtor(msg: str) -> str:
+    return f"Sending sms to realtor: {msg}"
 
 async def second_line_agent(msg: str) -> str:
     llm = ChatOpenAI()
