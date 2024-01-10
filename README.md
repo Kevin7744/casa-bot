@@ -1,19 +1,36 @@
-# casa-bot
+# Casa-Bot: Real Estate SMS Bot
 
-A real estate sms bot using twilio and langchain.
+Casa-Bot is a real estate SMS bot built using FastAPI, Twilio, LangChain, and Docker. It enables users to interact via SMS messages, book appointments, and perform various real estate-related tasks.
 
-## Dev
+## Project Structure
 
-`docker compose up --build`
+```plaintext
+.
+├── .vscode
+│   └── easycode.ignore
+├── services
+│   ├── api
+│   │   ├── toolset
+│   │   │   └── mongo_db.py
+│   │   ├── Dockerfile
+│   │   ├── main.py
+│   │   └── requirements.txt
+│   └── traefik
+│       ├── traefik.dev.toml
+│       └── traefik.prod.toml
+├── .gitignore
+├── README.md
+├── docker-compose.prod.yml
+├── docker-compose.yml
+└── traefik
+    └── traefik.toml
+```
+# Build and run development environment
+docker-compose up --build
 
-To smoke test:
+# Test API ping endpoint
+curl -H "Host: fastapi.localhost" http://0.0.0.0:81/ping
 
-`curl -H Host:fastapi.localhost http://0.0.0.0:81/ping`
-
-Note it's running on port 81 because I had some other service running on
-port 80 already. This is not the case in prod.
-
-To speak with the agent:
 ```
 curl -X POST "http://0.0.0.0:81/only-for-testing-agent" \
      -H "Host: fastapi.localhost" \
@@ -27,12 +44,17 @@ curl -X POST "http://0.0.0.0:81/only-for-testing-agent" \
          }'
 
 ```
-## Prod
 
-`docker-compose -f docker-compose.prod.yml up --build`
+# Stop development environment
+docker-compose down
 
-To smoke test:
 
-`curl https://subdomain.example.com`
+# Build and run production environment
+docker-compose -f docker-compose.prod.yml up --build
 
-Make sure you set up traefik and let's encrypt for your domain.
+# Test production environment
+curl https://subdomain.example.com
+
+# Stop production environment
+docker-compose -f docker-compose.prod.yml down
+
