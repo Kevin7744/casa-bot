@@ -46,15 +46,19 @@ curl -X POST "http://0.0.0.0:81/only-for-testing-agent" \
 ```
 
 # Stop development environment
-```docker-compose down
+```
+docker-compose down
 ```
 
 # Build and run production environment
-```docker-compose -f docker-compose.prod.yml up --build
+```
+docker-compose -f docker-compose.prod.yml up --build
 ```
 # Test production environment
-```curl https://subdomain.example.com
+```
+curl https://subdomain.example.com
 ```
 # Stop production environment
-```docker-compose -f docker-compose.prod.yml down
+```
+docker-compose -f docker-compose.prod.yml down
 ```
